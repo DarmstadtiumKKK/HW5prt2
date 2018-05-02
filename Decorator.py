@@ -1,4 +1,6 @@
 import time
+import types
+
 
 def get_list(val):
     list_of_method = []
@@ -12,36 +14,27 @@ def get_list(val):
 
 
 def profile(object_to_decorate):
+    if type(object_to_decorate) is types.FunctionType:
+        return the_wrapper_around_function(object_to_decorate)
+    else:
+        return the_wrapper_around_class(object_to_decorate)
 
-    def the_wrapper_around_function(*args):
-        print('Начало работы функции '+object_to_decorate.__name__)
+
+def the_wrapper_around_function(val):
+    def new_func(*args):
+        print('Начало работы функции '+val.__name__)
         t = time.clock()
-        res = object_to_decorate(*args)
+        res = val(*args)
         print("Время выполнения функции: %f" % (time.clock()-t))
         return res
+    return new_func
 
-    if str(type(object_to_decorate)) == "<class 'function'>":
-        return the_wrapper_around_function
-    else:
-        return my_shiny_new_decorator(object_to_decorate)
-
-
-
-def the_wrapper_around_method(method,*args):
-        def new_method(self):
-            print('Начало работы функции '+method.__name__)
-            t = time.clock()
-            res = method(self,*args)
-            print("Время выполнения функции: %f" % (time.clock() - t))
-            return res
-        return new_method
-
-def my_shiny_new_decorator(object_to_decorate):
-        list_of_method=get_list(object_to_decorate)
+def the_wrapper_around_class(kls):
+        list_of_method=get_list(kls)
         for attr_name in list_of_method:
-            attr = getattr(object_to_decorate, attr_name)
-            setattr(object_to_decorate, attr_name, the_wrapper_around_method(attr))
-        return object_to_decorate
+            attr = getattr(kls, attr_name)
+            setattr(kls, attr_name, the_wrapper_around_function(attr))
+        return kls
 
 
 
